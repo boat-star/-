@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
@@ -28,27 +29,30 @@ public class CommonController {
 
     /**
      * 文件上传
+     *
      * @param file
      * @return
      */
     @PostMapping("/upload")
     public R<String> upLoad(MultipartFile file) {
 
+        // file是临时文件，需要转存到指定位置
         // 原始文件名
         String originalFilename = file.getOriginalFilename();
-        // 获取文件类型（jpg、png）
-        String suffix = originalFilename.substring(originalFilename.lastIndexOf("."));
+        // 获取文件类型（.jpg、.png）
+        String suffix = originalFilename.substring(originalFilename.lastIndexOf(".")); // 包含.
 
         // 使用UUID重新生成文件名，防止文件名重复
         String fileName = UUID.randomUUID() + suffix;
 
         // 创建目录
         File dir = new File(basePath);
-        if(!dir.exists()) {
+        if (!dir.exists()) {
             dir.mkdirs();
         }
 
         try {
+            // 转存到另外一个位置
             file.transferTo(new File(basePath + fileName));
         } catch (IOException e) {
             e.printStackTrace();
@@ -58,6 +62,7 @@ public class CommonController {
 
     /**
      * 文件下载
+     *
      * @param name
      * @param response
      */
@@ -65,7 +70,7 @@ public class CommonController {
     public void downLoad(String name, HttpServletResponse response) {
         try {
             // 输入流，通过输入流读取文件内容
-            FileInputStream fileInputStream = new FileInputStream(new File(basePath + name));
+            FileInputStream fileInputStream = new FileInputStream(basePath + name);
 
             // 输出流，通过输出流将文件写回浏览器
             ServletOutputStream outputStream = response.getOutputStream();

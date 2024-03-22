@@ -11,7 +11,7 @@ import java.util.List;
 
 public interface DishService extends IService<Dish> {
 
-    public R<String> saveDishWithFlavor(DishDto dishDto);
+    R<String> saveDishWithFlavor(DishDto dishDto);
 
     R<Page> pageByDish(int page, int pageSize, String name);
 

@@ -13,6 +13,7 @@ import com.harmony.reggie.service.*;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Date;
@@ -48,7 +49,7 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         LambdaQueryWrapper<ShoppingCart> shoppingCartLambdaQueryWrapper = new LambdaQueryWrapper<>();
         shoppingCartLambdaQueryWrapper.eq(ShoppingCart::getUserId, userId);
         List<ShoppingCart> shoppingCartList = shoppingCartMapper.selectList(shoppingCartLambdaQueryWrapper);
-        if (shoppingCartList == null || shoppingCartList.size() == 0) {
+        if (shoppingCartList == null || shoppingCartList.isEmpty()) {
             throw new CustomException("购物车为空不能下单!");
         }
 
@@ -63,10 +64,10 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         }
 
 
-        /**
-         * myBatis-plus 提供的生成ID的方法
+        /*
+          myBatis-plus 提供的生成ID的方法
          */
-        long orderId = IdWorker.getId();
+        long orderId = IdWorker.getId(); // 订单号
 
         AtomicInteger amount = new AtomicInteger(0);
 
@@ -80,7 +81,7 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             orderDetail.setName(item.getName());
             orderDetail.setImage(item.getImage());
             orderDetail.setAmount(item.getAmount());
-            amount.addAndGet(item.getAmount().multiply(new BigDecimal(item.getNumber())).intValue());
+            amount.addAndGet(item.getAmount().multiply(new BigDecimal(item.getNumber())).intValue()); // addAndGet 相当于+=
             return orderDetail;
         }).collect(Collectors.toList());
 
@@ -102,7 +103,7 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         this.save(orders);
 
         // 向订单明细表插入数据，多条数据
-        for (OrderDetail orderDetail: orderDetails) {
+        for (OrderDetail orderDetail : orderDetails) {
             orderDetailMapper.insert(orderDetail);
         }
 

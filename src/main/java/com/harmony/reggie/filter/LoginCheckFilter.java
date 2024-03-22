@@ -19,6 +19,8 @@ import java.io.IOException;
  * @WebFilter : 声明一个Servlet 过滤器
  * @WebListener : 声明一个类为 Servlet 监听器
  */
+
+// 对每次请求都过滤
 @WebFilter(filterName = "loginCheckFilter", urlPatterns = "/*")
 @Slf4j
 public class LoginCheckFilter implements Filter {
@@ -62,7 +64,8 @@ public class LoginCheckFilter implements Filter {
 
             log.info("用户已登入，用户ID为: {}", request.getSession().getAttribute("employee"));
             Long empId = (Long) request.getSession().getAttribute("employee");
-            BaseContext.setCurrentId(empId);
+            // 一次http请求都触发一个单独的线程
+            BaseContext.setCurrentId(empId); // 自己写的工具类，使用threadLocal保证每个线程维护自己的empId
 
             filterChain.doFilter(request, response);
             return;

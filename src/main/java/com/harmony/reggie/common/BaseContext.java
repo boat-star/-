@@ -6,6 +6,7 @@ package com.harmony.reggie.common;
 public class BaseContext {
 
     // 作用域是每一个线程之内，每一个请求都是一个新的线程！！！
+    // 虽然是static变量，但是每个线程都维护自己的副本
     private static ThreadLocal<Long> threadLocal = new ThreadLocal<>();
 
     public static void setCurrentId(Long id) {

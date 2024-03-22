@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.Date;
 
 /**
@@ -23,6 +24,7 @@ public class OrderController {
 
     /**
      * 用户下单
+     *
      * @param orders
      * @return
      */
@@ -33,6 +35,7 @@ public class OrderController {
 
     /**
      * 订单分页查询
+     *
      * @param page
      * @param pageSize
      * @param number
@@ -42,11 +45,11 @@ public class OrderController {
      */
     @GetMapping("/page")
     public R<Page<Orders>> page(
-        int page,
-        int pageSize,
-        String number,
-        @DateTimeFormat(pattern = "yyyy-mm-dd HH:mm:ss") Date beginTime,
-        @DateTimeFormat(pattern = "yyyy-mm-dd HH:mm:ss") Date endTime) {
+            int page,
+            int pageSize,
+            String number,
+            @DateTimeFormat(pattern = "yyyy-mm-dd HH:mm:ss") Date beginTime,
+            @DateTimeFormat(pattern = "yyyy-mm-dd HH:mm:ss") Date endTime) {
         log.info(
                 "订单分页查询：page={}，pageSize={}，number={},beginTime={},endTime={}",
                 page,

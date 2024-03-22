@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 
 /**
  * MetaObjectHandler  元数据处理器
+ * 处理公共字段填充
  */
 @Component
 @Slf4j
