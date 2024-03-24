@@ -14,8 +14,11 @@ import com.harmony.reggie.service.SetmealService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -33,10 +36,11 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal> impl
     @Autowired
     private CategoryMapper categoryMapper;
 
+
     @Override
     @Transactional
+    @CacheEvict(value = "setmealCache", key = "#setmealDto.categoryId + '_' + #setmealDto.status")
     public R<String> saveSetmeal(SetmealDishDto setmealDto) {
-
         this.save(setmealDto);
 
         List<SetmealDish> setmealDishes = setmealDto.getSetmealDishes();
@@ -105,6 +109,7 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal> impl
 
     @Override
     @Transactional
+    @CacheEvict(value = "setmealCache", allEntries = true) // allEntries = true 删除setmealCache分类下的所有缓存
     public R<String> deleteSetmeal(List<Long> ids) {
         // 查菜品的状态，是否可以删除（）
         LambdaQueryWrapper<Setmeal> setmealQueryWrapper = new LambdaQueryWrapper<>();
@@ -112,7 +117,7 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal> impl
         setmealQueryWrapper.eq(Setmeal::getStatus, 1);
 
         int count = this.count(setmealQueryWrapper);
-        if(count > 0) {
+        if (count > 0) {
             throw new CustomException("菜品正在售卖中！不能删除！");
         }
 
@@ -144,18 +149,18 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal> impl
 
     @Override
     public R<String> updateSetmeal(SetmealDishDto setmealDishDto) {
-        if (setmealDishDto==null){
+        if (setmealDishDto == null) {
             return R.error("请求异常");
         }
 
-        if (setmealDishDto.getSetmealDishes()==null){
+        if (setmealDishDto.getSetmealDishes() == null) {
             return R.error("套餐没有菜品,请添加套餐");
         }
         List<SetmealDish> setmealDishes = setmealDishDto.getSetmealDishes();
         Long setmealId = setmealDishDto.getId();
 
         LambdaQueryWrapper<SetmealDish> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(SetmealDish::getSetmealId,setmealId);
+        queryWrapper.eq(SetmealDish::getSetmealId, setmealId);
         setmealDishMapper.delete(queryWrapper);
 
         //为setmeal_dish表填充相关的属性
@@ -172,10 +177,11 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal> impl
     }
 
     @Override
+    @Cacheable(value = "setmealCache", key = "#setmeal.categoryId + '_' + #setmeal.status")
     public R<List<Setmeal>> selectSetmealList(Setmeal setmeal) {
         LambdaQueryWrapper<Setmeal> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(setmeal.getCategoryId() != null,Setmeal::getCategoryId,setmeal.getCategoryId());
-        queryWrapper.eq(setmeal.getStatus() != null,Setmeal::getStatus,setmeal.getStatus());
+        queryWrapper.eq(setmeal.getCategoryId() != null, Setmeal::getCategoryId, setmeal.getCategoryId());
+        queryWrapper.eq(setmeal.getStatus() != null, Setmeal::getStatus, setmeal.getStatus());
         queryWrapper.orderByDesc(Setmeal::getUpdateTime);
 
         List<Setmeal> list = setmealMapper.selectList(queryWrapper);
